@@ -1204,14 +1204,13 @@
 (function() {
   if (window.self === window.top) return; // only when embedded
 
-  // Break the viewport-feedback loop: override 100dvh min-heights
+  // Break viewport-feedback loop and hide ambient decorations when embedded
   var fix = document.createElement('style');
   fix.textContent =
-    'html,body{min-height:0 !important;height:auto !important;}' +
-    '.app{min-height:0 !important;padding-top:32px !important;padding-bottom:32px !important;}' +
-    '.header{position:absolute !important;}' +
-    '.mountains{position:absolute !important;bottom:-40vh;}' +
-    'body::before{position:absolute !important;}';
+    'html,body{min-height:0 !important;height:auto !important;background:#0C1426 !important;}' +
+    '.app{min-height:0 !important;padding:32px !important;}' +
+    '.header,.progress,.mountains{display:none !important;}' +
+    'body::before{display:none !important;}';
   document.head.appendChild(fix);
 
   var MIN = 700, MAX = 4000, lastSent = 0;
