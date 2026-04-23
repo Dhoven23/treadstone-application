@@ -1199,6 +1199,20 @@
   }
 
   updateProgress();
+
+// Notify parent of current content height (for iframe embedding)
+(function() {
+  if (window.self === window.top) return; // only when embedded
+  function sendHeight() {
+    var h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ type: 'treadstone:height', height: h }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  // Re-send whenever screens change
+  const obs = new MutationObserver(sendHeight);
+  obs.observe(document.body, { attributes: true, childList: true, subtree: true });
+})();
 </script>
 
 </body>
