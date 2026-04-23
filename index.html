@@ -1200,23 +1200,39 @@
 
   updateProgress();
 
-// Notify parent of current content height (for iframe embedding)
+// Iframe embedding support: strip viewport-coupled heights, report content height
 (function() {
   if (window.self === window.top) return; // only when embedded
-  var MIN_HEIGHT = 700;
+
+  // Break the viewport-feedback loop: override 100dvh min-heights
+  var fix = document.createElement('style');
+  fix.textContent =
+    'html,body{min-height:0 !important;height:auto !important;}' +
+    '.app{min-height:0 !important;padding-top:32px !important;padding-bottom:32px !important;}' +
+    '.header{position:absolute !important;}' +
+    '.mountains{position:absolute !important;bottom:-40vh;}' +
+    'body::before{position:absolute !important;}';
+  document.head.appendChild(fix);
+
+  var MIN = 700, MAX = 4000, lastSent = 0;
+  function measure() {
+    var wrap = document.querySelector('.screen-wrap');
+    var contentH = wrap ? wrap.getBoundingClientRect().bottom + 60 : 0;
+    return Math.min(MAX, Math.max(MIN, Math.ceil(contentH)));
+  }
   function sendHeight() {
-    var h = Math.max(
-      document.documentElement.scrollHeight,
-      document.body ? document.body.scrollHeight : 0,
-      MIN_HEIGHT
-    );
+    var h = measure();
+    if (Math.abs(h - lastSent) < 8) return; // debounce tiny fluctuations
+    lastSent = h;
     window.parent.postMessage({ type: 'treadstone:height', height: h }, '*');
   }
   window.addEventListener('load', sendHeight);
-  window.addEventListener('resize', sendHeight);
-  var obs = new MutationObserver(sendHeight);
-  obs.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
-  // Safety: repeat for first 3s in case parent collapsed us early
+  // Only re-measure on real DOM changes inside the form, not attribute noise
+  var wrap = document.querySelector('.screen-wrap');
+  if (wrap) {
+    new MutationObserver(sendHeight).observe(wrap, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  }
+  // Safety repeats for first 3s
   var t = 0, iv = setInterval(function() { sendHeight(); if (++t > 6) clearInterval(iv); }, 500);
 })();
 </script>
