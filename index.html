@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0C1426" />
+<title>Treadstone Financial Group — Application</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0C1426;
+    --bg-1: #111B31;
+    --bg-2: #17233E;
+    --bg-3: #1E2B45;
+    --ink: #FFFFFF;
+    --ink-soft: #D5DBE6;
+    --muted: #6B778C;
+    --muted-dim: #3E4A61;
+    --line: #1E2B45;
+    --line-strong: #2B3B5A;
+    --accent: #D4AF6A;
+    --accent-soft: #9C804A;
+    --accent-dim: #6A5632;
+    --danger: #D97B6E;
+    --ease: cubic-bezier(.2,.7,.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* Ambient atmosphere */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(212,175,106,.04) 0%, transparent 60%),
+      radial-gradient(ellipse 120% 80% at 50% 100%, rgba(0,0,0,.5) 40%, transparent 100%);
+  }
+
+  /* Mountain silhouette */
+  .mountains {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 40vh;
+    z-index: 1;
+    opacity: .18;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 400' preserveAspectRatio='xMidYMax slice'><path d='M0,400 L0,260 L120,200 L200,240 L280,160 L360,210 L460,120 L540,180 L620,80 L700,40 L740,70 L820,130 L900,90 L980,160 L1060,110 L1140,170 L1220,140 L1300,200 L1380,170 L1440,220 L1440,400 Z' fill='%23000'/><path d='M0,400 L0,310 L100,280 L180,310 L280,250 L380,290 L480,230 L580,280 L680,220 L780,260 L880,230 L980,280 L1080,250 L1180,290 L1280,260 L1380,300 L1440,280 L1440,400 Z' fill='%23000' opacity='.6'/></svg>") no-repeat center bottom;
+    background-size: cover;
+    transition: opacity .6s var(--ease);
+  }
+  body.inside-funnel .mountains { opacity: .06; }
+
+  /* Progress */
+  .progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--bg-2);
+    z-index: 50;
+  }
+  .progress__bar {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width .55s var(--ease);
+  }
+
+  /* Header */
+  .header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 32px 18px;
+    z-index: 40;
+    background: linear-gradient(to bottom, rgba(12,20,38,.95) 0%, rgba(12,20,38,0) 100%);
+    pointer-events: none;
+  }
+  .header > * { pointer-events: auto; }
+
+  .brand-mini {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .4s var(--ease);
+  }
+  body.inside-funnel .brand-mini {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .brand-mini__img {
+    height: 28px;
+    width: auto;
+    display: block;
+  }
+  .brand-mini__text {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .brand-mini__text .gold {
+    color: var(--accent);
+    font-weight: 500;
+    display: block;
+    font-size: 9px;
+    letter-spacing: .24em;
+    margin-top: 2px;
+  }
+
+  .step-counter {
+    font-family: "Montserrat", sans-serif;
+    font-size: 11px;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .step-counter .current {
+    color: var(--ink);
+    font-weight: 600;
+    margin-right: 2px;
+  }
+
+  /* Container */
+  .app {
+    position: relative;
+    z-index: 2;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 90px 32px 60px;
+  }
+
+  .screen-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .screen {
+    display: none;
+    animation: fadeUp .5s var(--ease) both;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Welcome screen — logo-centered */
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .welcome__logo {
+    width: 220px;
+    max-width: 60vw;
+    height: auto;
+    margin-bottom: 40px;
+    display: block;
+  }
+  .welcome__title {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 300;
+    font-size: clamp(28px, 4.2vw, 40px);
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0 0 12px;
+  }
+  .welcome__rule {
+    width: 48px;
+    height: 1px;
+    background: var(--accent);
+    margin: 20px 0 24px;
+  }
+  .welcome__subtitle {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 32px;
+  }
+  .welcome__intro {
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 46ch;
+    margin: 0 auto 44px;
+    font-weight: 300;
+  }
+  .welcome__meta {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid var(--line-strong);
+    padding-top: 28px;
+    margin-top: 16px;
+    width: 100%;
+    max-width: 520px;
+    justify-content: space-around;
+  }
+  .welcome__meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 20px;
+  }
+  .welcome__meta-item + .welcome__meta-item {
+    border-left: 1px solid var(--line);
+  }
+  .welcome__meta-label {
+    font-family: "Montserrat", sans-serif;
+    font-size: 10px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .welcome__meta-value {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--ink);
+    letter-spacing: .04em;
+  }
+  @media (max-width: 560px) {
+    .welcome__meta { flex-direction: column; gap: 18px; padding-top: 22px; }
+    .welcome__meta-item { padding: 0; flex-direction: row; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 16px; }
+    .welcome__meta-item + .welcome__meta-item { border-left: 0; border-top: 1px solid var(--line); padding-top: 16px; }
+  }
+
+  /* Question screens */
+  .q-num {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: .34em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin: 0 0 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .q-num::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--accent-soft);
+  }
+
+  .q-title {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 400;
+    font-size: clamp(24px, 3.8vw, 34px);
+    line-height: 1.25;
+    letter-spacing: -.005em;
+    color: var(--ink);
+    margin: 0 0 14px;
+  }
+
+  .q-help {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0 0 32px;
+    font-weight: 400;
+    max-width: 58ch;
+  }
+
+  /* Inputs */
+  .field { margin-bottom: 22px; }
+  .field__label {
+    display: block;
+    font-family: "Montserrat", sans-serif;
+    font-size: 10px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .input, .textarea {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--line-strong);
+    padding: 12px 0 12px;
+    font-size: 17px;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .3s var(--ease);
+    border-radius: 0;
+    caret-color: var(--accent);
+  }
+  .input::placeholder, .textarea::placeholder {
+    color: var(--muted-dim);
+    font-weight: 300;
+  }
+  .input:focus, .textarea:focus {
+    border-color: var(--accent);
+  }
+  .textarea {
+    resize: none;
+    min-height: 120px;
+    line-height: 1.55;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 28px;
+  }
+  @media (max-width: 560px) {
+    .grid-2 { grid-template-columns: 1fr; gap: 18px; }
+  }
+
+  /* Radio options */
+  .options {
+    display: grid;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: all .22s var(--ease);
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    border-radius: 2px;
+  }
+  .option:hover {
+    border-color: var(--accent-soft);
+    background: var(--bg-2);
+    color: var(--ink);
+  }
+  .option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .option__label { flex: 1; font-weight: 500; }
+  .option__indicator {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--muted);
+    flex-shrink: 0;
+    transition: all .2s var(--ease);
+    border-radius: 50%;
+    position: relative;
+  }
+  .option input:checked ~ .option__indicator {
+    border-color: var(--accent);
+  }
+  .option input:checked ~ .option__indicator::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .option:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--bg-2);
+    color: var(--ink);
+  }
+
+  /* 1-10 scale */
+  .scale {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+    margin: 4px 0 12px;
+  }
+  .scale__btn {
+    aspect-ratio: 1;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-1);
+    font-family: "Montserrat", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s var(--ease);
+    border-radius: 2px;
+  }
+  .scale__btn:hover {
+    border-color: var(--accent-soft);
+    color: var(--ink);
+    background: var(--bg-2);
+  }
+  .scale__btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+  .scale__labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: "Montserrat", sans-serif;
+    font-size: 10px;
+    letter-spacing: .26em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* Buttons */
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 44px;
+    flex-wrap: wrap;
+  }
+  .actions--center {
+    justify-content: center;
+    margin-top: 40px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 32px;
+    background: var(--accent);
+    color: var(--bg);
+    border: 1px solid var(--accent);
+    font-family: "Montserrat", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .25s var(--ease);
+    position: relative;
+    border-radius: 2px;
+  }
+  .btn:hover {
+    background: transparent;
+    color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .btn:disabled {
+    opacity: .3;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn__arrow {
+    transition: transform .25s var(--ease);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .btn:not(:disabled):hover .btn__arrow {
+    transform: translateX(4px);
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    font-family: "Montserrat", sans-serif;
+    font-size: 10px;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 8px 0;
+    transition: color .2s var(--ease);
+    font-weight: 500;
+  }
+  .btn-back:hover { color: var(--accent); }
+
+  /* Error */
+  .error {
+    color: var(--danger);
+    font-family: "Montserrat", sans-serif;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    margin-top: 12px;
+    display: none;
+    font-weight: 500;
+  }
+  .error.show { display: block; }
+
+  /* Thank you */
+  .thanks {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .thanks__logo {
+    width: 180px;
+    max-width: 50vw;
+    height: auto;
+    margin-bottom: 36px;
+    opacity: .85;
+  }
+  .thanks__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    margin-bottom: 28px;
+    color: var(--accent);
+  }
+  .thanks__mark svg { width: 22px; height: 22px; }
+  .thanks__title {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 300;
+    font-size: clamp(26px, 4vw, 36px);
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0 0 12px;
+  }
+  .thanks__rule {
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+    margin: 16px 0 24px;
+  }
+  .thanks__text {
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 44ch;
+    margin: 0 auto 44px;
+    font-weight: 300;
+  }
+  .next-steps {
+    width: 100%;
+    max-width: 560px;
+    text-align: left;
+  }
+  .next-steps h3 {
+    font-family: "Montserrat", sans-serif;
+    font-size: 10px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    margin: 0 0 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .next-steps ol {
+    margin: 0; padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .next-steps li {
+    counter-increment: step;
+    padding: 18px 0 18px 52px;
+    position: relative;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  .next-steps li:last-child { border-bottom: 0; }
+  .next-steps li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 18px;
+    font-family: "Montserrat", sans-serif;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: .08em;
+  }
+
+  /* Footer */
+  .footer {
+    position: relative;
+    z-index: 2;
+    padding: 32px 32px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: "Montserrat", sans-serif;
+    font-size: 9px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: var(--muted-dim);
+    font-weight: 500;
+  }
+  .footer__sep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--muted-dim);
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .header { padding: 18px 22px 14px; }
+    .app { padding: 80px 22px 50px; }
+    .scale { gap: 4px; }
+    .scale__btn { font-size: 13px; }
+    .actions { gap: 18px; }
+    .btn { padding: 14px 28px; width: 100%; justify-content: center; font-size: 11px; letter-spacing: .26em; }
+    .btn-back { order: 2; margin-left: 0; }
+    .option { padding: 18px 20px; font-size: 15px; }
+    .welcome__logo { width: 180px; margin-bottom: 32px; }
+    .brand-mini__img { height: 24px; }
+    .brand-mini__text { font-size: 10px; letter-spacing: .22em; }
+    .brand-mini__text .gold { font-size: 8px; }
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 4px;
+  }
+  .input:focus-visible, .textarea:focus-visible { outline: none; }
+
+  ::selection { background: var(--accent); color: var(--bg); }
+</style>
+</head>
+<body>
+
+<div class="mountains"></div>
+
+<div class="progress"><div class="progress__bar" id="progressBar"></div></div>
+
+<header class="header">
+  <div class="brand-mini">
+    <img class="brand-mini__img" src="logo.png" alt="Treadstone Financial Group" />
+    <div class="brand-mini__text">
+      Treadstone
+      <span class="gold">Financial Group</span>
+    </div>
+  </div>
+  <div class="step-counter" id="stepCounter"><span class="current">00</span> / 13</div>
+</header>
+
+<main class="app">
+  <div class="screen-wrap">
+
+    <!-- Welcome -->
+    <section class="screen active" data-screen="welcome">
+      <div class="welcome">
+        <img class="welcome__logo" src="logo.png" alt="Treadstone Financial Group" />
+        <p class="welcome__subtitle">Applicant Intake</p>
+        <h1 class="welcome__title">Application</h1>
+        <div class="welcome__rule"></div>
+        <p class="welcome__intro">
+          Please complete the following questions. All fields are required unless noted.
+        </p>
+        <div class="actions actions--center">
+          <button class="btn" data-action="start">
+            Begin
+            <span class="btn__arrow">→</span>
+          </button>
+        </div>
+        <div class="welcome__meta">
+          <div class="welcome__meta-item">
+            <span class="welcome__meta-label">Time</span>
+            <span class="welcome__meta-value">~4 Minutes</span>
+          </div>
+          <div class="welcome__meta-item">
+            <span class="welcome__meta-label">Questions</span>
+            <span class="welcome__meta-value">13 Total</span>
+          </div>
+          <div class="welcome__meta-item">
+            <span class="welcome__meta-label">Response</span>
+            <span class="welcome__meta-value">48 Hours</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 01 Contact -->
+    <section class="screen" data-screen="contact" data-step="1">
+      <p class="q-num">Question 01</p>
+      <h2 class="q-title">Contact information</h2>
+      <div class="grid-2">
+        <div class="field">
+          <label class="field__label" for="f_name">Full Name</label>
+          <input class="input" id="f_name" name="name" type="text" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label class="field__label" for="f_phone">Phone</label>
+          <input class="input" id="f_phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required />
+        </div>
+        <div class="field">
+          <label class="field__label" for="f_email">Email</label>
+          <input class="input" id="f_email" name="email" type="email" autocomplete="email" inputmode="email" required />
+        </div>
+        <div class="field">
+          <label class="field__label" for="f_location">City, State</label>
+          <input class="input" id="f_location" name="location" type="text" autocomplete="address-level2" required />
+        </div>
+      </div>
+      <p class="error" data-error="contact">All fields required.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 02 Current Work -->
+    <section class="screen" data-screen="work" data-step="2">
+      <p class="q-num">Question 02</p>
+      <h2 class="q-title">What do you currently do for work?</h2>
+      <div class="field">
+        <input class="input" name="current_work" type="text" data-required />
+      </div>
+      <p class="error" data-error="work">Required.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 03 Hours Current -->
+    <section class="screen" data-screen="hours_current" data-step="3">
+      <p class="q-num">Question 03</p>
+      <h2 class="q-title">How many hours per week are you currently working?</h2>
+      <div class="options">
+        <label class="option"><input type="radio" name="hours_current" value="under_20" required /><span class="option__label">Under 20</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="hours_current" value="20_40" /><span class="option__label">20–40 hours</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="hours_current" value="40_50" /><span class="option__label">40–50 hours</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="hours_current" value="50_60" /><span class="option__label">50–60 hours</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="hours_current" value="60_plus" /><span class="option__label">60+ hours</span><span class="option__indicator"></span></label>
+      </div>
+      <p class="error" data-error="hours_current">Please select an option.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 04 Income -->
+    <section class="screen" data-screen="income" data-step="4">
+      <p class="q-num">Question 04</p>
+      <h2 class="q-title">What is your current monthly income?</h2>
+      <div class="options">
+        <label class="option"><input type="radio" name="income" value="under_3k" required /><span class="option__label">Under $3,000</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="income" value="3k_5k" /><span class="option__label">$3,000 – $5,000</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="income" value="5k_8k" /><span class="option__label">$5,000 – $8,000</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="income" value="8k_12k" /><span class="option__label">$8,000 – $12,000</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="income" value="12k_plus" /><span class="option__label">$12,000+</span><span class="option__indicator"></span></label>
+      </div>
+      <p class="error" data-error="income">Please select a range.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 05 Why Change -->
+    <section class="screen" data-screen="why_change" data-step="5">
+      <p class="q-num">Question 05</p>
+      <h2 class="q-title">Why are you looking for something different?</h2>
+      <div class="field">
+        <textarea class="textarea" name="why_change" data-required rows="4"></textarea>
+      </div>
+      <p class="error" data-error="why_change">Required.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 06 Urgency -->
+    <section class="screen" data-screen="urgency" data-step="6">
+      <p class="q-num">Question 06</p>
+      <h2 class="q-title">On a scale of 1–10, how important is it to you to make a change right now?</h2>
+      <div class="scale" id="scale">
+        <button type="button" class="scale__btn" data-value="1">1</button>
+        <button type="button" class="scale__btn" data-value="2">2</button>
+        <button type="button" class="scale__btn" data-value="3">3</button>
+        <button type="button" class="scale__btn" data-value="4">4</button>
+        <button type="button" class="scale__btn" data-value="5">5</button>
+        <button type="button" class="scale__btn" data-value="6">6</button>
+        <button type="button" class="scale__btn" data-value="7">7</button>
+        <button type="button" class="scale__btn" data-value="8">8</button>
+        <button type="button" class="scale__btn" data-value="9">9</button>
+        <button type="button" class="scale__btn" data-value="10">10</button>
+      </div>
+      <div class="scale__labels">
+        <span>Low</span>
+        <span>Critical</span>
+      </div>
+      <input type="hidden" name="urgency" id="urgencyInput" />
+      <p class="error" data-error="urgency">Select a number.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 07 Success -->
+    <section class="screen" data-screen="success" data-step="7">
+      <p class="q-num">Question 07</p>
+      <h2 class="q-title">What does success look like for you over the next 12 months?</h2>
+      <div class="field">
+        <textarea class="textarea" name="success_12mo" data-required rows="5"></textarea>
+      </div>
+      <p class="error" data-error="success">Required.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 08 Commission -->
+    <section class="screen" data-screen="commission" data-step="8">
+      <p class="q-num">Question 08</p>
+      <h2 class="q-title">Have you ever worked in a commission or performance-based role?</h2>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="commission" value="yes" required />
+          <span class="option__label">Yes</span>
+          <span class="option__indicator"></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="commission" value="no" />
+          <span class="option__label">No</span>
+          <span class="option__indicator"></span>
+        </label>
+      </div>
+      <p class="error" data-error="commission">Please select yes or no.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 09 Commission Detail -->
+    <section class="screen" data-screen="commission_detail" data-step="9">
+      <p class="q-num">Question 09</p>
+      <h2 class="q-title">If yes, what was your experience?</h2>
+      <div class="field">
+        <textarea class="textarea" name="commission_detail" data-required rows="5"></textarea>
+      </div>
+      <p class="error" data-error="commission_detail">Required.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 10 Hours Available -->
+    <section class="screen" data-screen="hours_available" data-step="10">
+      <p class="q-num">Question 10</p>
+      <h2 class="q-title">How many hours per week can you realistically commit to building something new?</h2>
+      <div class="options">
+        <label class="option"><input type="radio" name="hours_available" value="under_10" required /><span class="option__label">Under 10 hours</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="hours_available" value="10_20" /><span class="option__label">10–20 hours</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="hours_available" value="20_30" /><span class="option__label">20–30 hours</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="hours_available" value="30_40" /><span class="option__label">30–40 hours</span><span class="option__indicator"></span></label>
+        <label class="option"><input type="radio" name="hours_available" value="40_plus" /><span class="option__label">40+ hours</span><span class="option__indicator"></span></label>
+      </div>
+      <p class="error" data-error="hours_available">Please select an option.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 11 Blockers -->
+    <section class="screen" data-screen="blockers" data-step="11">
+      <p class="q-num">Question 11</p>
+      <h2 class="q-title">Is there anything that would prevent you from fully committing if this is a good fit?</h2>
+      <div class="field">
+        <textarea class="textarea" name="blockers" data-required rows="4" placeholder='If none, type "None."'></textarea>
+      </div>
+      <p class="error" data-error="blockers">Required.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 12 Start Date -->
+    <section class="screen" data-screen="start_date" data-step="12">
+      <p class="q-num">Question 12</p>
+      <h2 class="q-title">If accepted, how soon would you be ready to start?</h2>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="start_date" value="immediately" required />
+          <span class="option__label">Immediately</span>
+          <span class="option__indicator"></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="start_date" value="2_weeks" />
+          <span class="option__label">2 Weeks</span>
+          <span class="option__indicator"></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="start_date" value="30_plus" />
+          <span class="option__label">30+ Days</span>
+          <span class="option__indicator"></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="start_date" value="exploring" />
+          <span class="option__label">Just Exploring Options</span>
+          <span class="option__indicator"></span>
+        </label>
+      </div>
+      <p class="error" data-error="start_date">Please select one.</p>
+      <div class="actions">
+        <button class="btn" data-action="next">Continue <span class="btn__arrow">→</span></button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- 13 Pitch -->
+    <section class="screen" data-screen="pitch" data-step="13">
+      <p class="q-num">Question 13</p>
+      <h2 class="q-title">Why should we consider working with you?</h2>
+      <div class="field">
+        <textarea class="textarea" name="pitch" data-required rows="6"></textarea>
+      </div>
+      <p class="error" data-error="pitch">Required.</p>
+      <div class="actions">
+        <button class="btn" data-action="submit">
+          Submit Application <span class="btn__arrow">→</span>
+        </button>
+        <button class="btn-back" data-action="back">← Back</button>
+      </div>
+    </section>
+
+    <!-- Thanks -->
+    <section class="screen" data-screen="thanks">
+      <div class="thanks">
+        <img class="thanks__logo" src="logo.png" alt="Treadstone Financial Group" />
+        <div class="thanks__mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h1 class="thanks__title">Application Received</h1>
+        <div class="thanks__rule"></div>
+        <p class="thanks__text">
+          Your application has been submitted successfully. Our team will review and respond within 48 hours.
+        </p>
+        <div class="next-steps">
+          <h3>What Happens Next</h3>
+          <ol>
+            <li>Our team reviews your application within 48 hours.</li>
+            <li>If you are a fit, we will contact you at the number you provided to schedule a conversation.</li>
+            <li>If it is not a fit at this time, we will notify you and keep your information on file.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="footer">
+  <span>Treadstone Financial Group</span>
+  <span class="footer__sep"></span>
+  <span>Confidential Intake</span>
+</footer>
+
+<script>
+  const screens = Array.from(document.querySelectorAll('.screen'));
+  const progressBar = document.getElementById('progressBar');
+  const stepCounter = document.getElementById('stepCounter');
+  const totalSteps = 13;
+
+  const flow = [
+    'welcome','contact','work','hours_current','income','why_change',
+    'urgency','success','commission','commission_detail','hours_available',
+    'blockers','start_date','pitch','thanks'
+  ];
+
+  let currentIdx = 0;
+  const data = {};
+
+  function showScreen(name) {
+    screens.forEach(s => s.classList.remove('active'));
+    const target = document.querySelector(`[data-screen="${name}"]`);
+    if (!target) return;
+    target.style.animation = 'none';
+    target.offsetHeight;
+    target.style.animation = '';
+    target.classList.add('active');
+
+    if (name !== 'welcome' && name !== 'thanks') {
+      document.body.classList.add('inside-funnel');
+    } else if (name === 'welcome') {
+      document.body.classList.remove('inside-funnel');
+    }
+
+    setTimeout(() => {
+      const input = target.querySelector('input:not([type=hidden]):not([type=radio]), textarea');
+      if (input && window.innerWidth > 640) input.focus({ preventScroll: true });
+    }, 400);
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function updateProgress() {
+    const screen = document.querySelector('.screen.active');
+    if (!screen) return;
+    const step = parseInt(screen.dataset.step || '0', 10);
+    const name = screen.dataset.screen;
+    const pct = name === 'welcome' ? 0
+              : name === 'thanks' ? 100
+              : (step / totalSteps) * 100;
+    progressBar.style.width = pct + '%';
+    if (name === 'welcome') {
+      stepCounter.innerHTML = `<span class="current">00</span> / ${totalSteps}`;
+    } else if (name === 'thanks') {
+      stepCounter.innerHTML = `<span class="current">Complete</span>`;
+    } else {
+      stepCounter.innerHTML = `<span class="current">${String(step).padStart(2,'0')}</span> / ${totalSteps}`;
+    }
+  }
+
+  function currentScreenEl() { return document.querySelector('.screen.active'); }
+
+  function validateCurrent() {
+    const el = currentScreenEl();
+    if (!el) return true;
+    const name = el.dataset.screen;
+    const errorEl = el.querySelector('.error');
+    let ok = true;
+
+    if (name === 'contact') {
+      const inputs = el.querySelectorAll('input[required]');
+      for (const i of inputs) {
+        if (!i.value.trim()) { ok = false; break; }
+      }
+      const emailEl = el.querySelector('#f_email');
+      if (ok && emailEl.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value)) ok = false;
+    } else {
+      const radio = el.querySelector('input[type="radio"][required]');
+      if (radio) {
+        const groupName = radio.name;
+        ok = !!el.querySelector(`input[name="${groupName}"]:checked`);
+      }
+      const hiddenUrgency = el.querySelector('#urgencyInput');
+      if (hiddenUrgency) ok = !!hiddenUrgency.value;
+      const required = el.querySelector('[data-required]');
+      if (required) ok = !!required.value.trim();
+    }
+
+    if (errorEl) errorEl.classList.toggle('show', !ok);
+    return ok;
+  }
+
+  function captureCurrent() {
+    const el = currentScreenEl();
+    if (!el) return;
+    el.querySelectorAll('input:not([type=radio]), textarea').forEach(i => {
+      if (i.name) data[i.name] = i.value.trim();
+    });
+    el.querySelectorAll('input[type="radio"]:checked').forEach(i => {
+      data[i.name] = i.value;
+    });
+  }
+
+  function goNext() {
+    if (!validateCurrent()) return;
+    captureCurrent();
+    let nextIdx = currentIdx + 1;
+    if (flow[currentIdx] === 'commission' && data.commission === 'no') {
+      nextIdx = flow.indexOf('hours_available');
+    }
+    currentIdx = nextIdx;
+    showScreen(flow[currentIdx]);
+  }
+
+  function goBack() {
+    if (currentIdx === 0) return;
+    let prevIdx = currentIdx - 1;
+    if (flow[currentIdx] === 'hours_available' && data.commission === 'no') {
+      prevIdx = flow.indexOf('commission');
+    }
+    currentIdx = prevIdx;
+    showScreen(flow[currentIdx]);
+  }
+
+  async function submitForm() {
+    if (!validateCurrent()) return;
+    captureCurrent();
+    data.submitted_at = new Date().toISOString();
+    data.user_agent = navigator.userAgent;
+
+    // TODO: POST to your backend
+    // await fetch('/api/applications', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(data)
+    // });
+    console.log('APPLICATION SUBMITTED:', data);
+
+    currentIdx = flow.indexOf('thanks');
+    showScreen('thanks');
+  }
+
+  document.addEventListener('click', (e) => {
+    const action = e.target.closest('[data-action]')?.dataset.action;
+    if (!action) return;
+    e.preventDefault();
+    if (action === 'start') { currentIdx = 1; showScreen(flow[1]); }
+    if (action === 'next') goNext();
+    if (action === 'back') goBack();
+    if (action === 'submit') submitForm();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const el = currentScreenEl();
+    if (!el) return;
+    const name = el.dataset.screen;
+    const target = e.target;
+
+    if (name === 'welcome') { e.preventDefault(); currentIdx = 1; showScreen(flow[1]); return; }
+    if (name === 'thanks') return;
+
+    if (target.tagName === 'TEXTAREA' && !(e.metaKey || e.ctrlKey)) return;
+
+    e.preventDefault();
+    const lastScreen = flow[flow.length - 2];
+    if (name === lastScreen) submitForm();
+    else goNext();
+  });
+
+  document.querySelectorAll('.scale__btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.scale__btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('urgencyInput').value = btn.dataset.value;
+    });
+  });
+
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      setTimeout(() => {
+        const el = currentScreenEl();
+        if (el && el.querySelector(`input[name="${radio.name}"]:checked`)) {
+          goNext();
+        }
+      }, 340);
+    });
+  });
+
+  const phoneEl = document.getElementById('f_phone');
+  if (phoneEl) {
+    phoneEl.addEventListener('input', (e) => {
+      const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+      if (digits.length < 4) e.target.value = digits;
+      else if (digits.length < 7) e.target.value = `(${digits.slice(0,3)}) ${digits.slice(3)}`;
+      else e.target.value = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+    });
+  }
+
+  updateProgress();
+</script>
+
+</body>
+</html>
