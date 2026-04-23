@@ -1123,19 +1123,56 @@
     showScreen(flow[currentIdx]);
   }
 
+  const WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/VsgBgX6JopIbGJ3i1cnb/webhook-trigger/3fcd8439-e764-4f58-acb7-6f07ff539d6c';
+  let submitInFlight = false;
+
   async function submitForm() {
+    if (submitInFlight) return;
     if (!validateCurrent()) return;
     captureCurrent();
-    data.submitted_at = new Date().toISOString();
-    data.user_agent = navigator.userAgent;
 
-    // TODO: POST to your backend
-    // await fetch('/api/applications', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(data)
-    // });
-    console.log('APPLICATION SUBMITTED:', data);
+    submitInFlight = true;
+    const submitBtn = document.querySelector('[data-action="submit"]');
+    const originalHTML = submitBtn ? submitBtn.innerHTML : null;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Submitting&hellip;';
+    }
+
+    // Split full name for downstream CRM mapping
+    const fullName = (data.name || '').trim();
+    const spaceIdx = fullName.indexOf(' ');
+    const firstName = spaceIdx > -1 ? fullName.slice(0, spaceIdx) : fullName;
+    const lastName  = spaceIdx > -1 ? fullName.slice(spaceIdx + 1) : '';
+
+    const payload = {
+      ...data,
+      full_name:    fullName,
+      first_name:   firstName,
+      last_name:    lastName,
+      submitted_at: new Date().toISOString(),
+      user_agent:   navigator.userAgent,
+      source:       'treadstone_application',
+      page_url:     (window.self !== window.top && document.referrer) ? document.referrer : location.href
+    };
+
+    try {
+      const resp = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      });
+      if (!resp.ok) console.error('Webhook returned status', resp.status);
+    } catch (err) {
+      // Non-blocking: still advance to thanks. Network failures shouldn't penalize the applicant.
+      console.error('Submit failed:', err);
+    }
+
+    if (submitBtn && originalHTML) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHTML;
+    }
 
     currentIdx = flow.indexOf('thanks');
     showScreen('thanks');
